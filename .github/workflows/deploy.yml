@@ -1,0 +1,42 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+env:
+  DEPLOY_PATH: /opt/telegram-bot-filter
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rsync to server
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete
+          path: ./
+          remote_path: ${{ env.DEPLOY_PATH }}/
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd ${{ env.DEPLOY_PATH }}
+            echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" > .env
+            python3 -m venv .venv 2>/dev/null || true
+            . .venv/bin/activate
+            pip install -q -r requirements.txt
+            if systemctl is-active --quiet telegram-bot-filter 2>/dev/null; then
+              sudo systemctl restart telegram-bot-filter
+            fi
+            echo "Deploy done."
