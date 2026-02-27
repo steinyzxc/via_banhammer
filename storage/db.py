@@ -83,7 +83,7 @@ async def set_chat_mode(chat_id: int, mode: str) -> None:
 async def add_bot_to_list(chat_id: int, username: str) -> tuple[bool, str]:
     username = _norm_username(username)
     if not username:
-        return False, "Invalid username."
+        return False, "Некорректное имя пользователя."
     await ensure_chat(chat_id)
     async with aiosqlite.connect(DB_PATH) as db:
         cur = await db.execute(
@@ -91,19 +91,19 @@ async def add_bot_to_list(chat_id: int, username: str) -> tuple[bool, str]:
         )
         (count,) = (await cur.fetchone()) or (0,)
         if count >= BOT_LIST_LIMIT:
-            return False, f"Bot list limit ({BOT_LIST_LIMIT}) reached."
+            return False, f"Достигнут лимит списка ботов ({BOT_LIST_LIMIT})."
         await db.execute(
             "INSERT OR IGNORE INTO bot_list (chat_id, bot_username) VALUES (?, ?)",
             (chat_id, username),
         )
         await db.commit()
-    return True, f"Added @{username}."
+    return True, f"Добавлен @{username}."
 
 
 async def remove_bot_from_list(chat_id: int, username: str) -> tuple[bool, str]:
     username = _norm_username(username)
     if not username:
-        return False, "Invalid username."
+        return False, "Некорректное имя пользователя."
     async with aiosqlite.connect(DB_PATH) as db:
         cur = await db.execute(
             "DELETE FROM bot_list WHERE chat_id = ? AND bot_username = ?",
@@ -111,8 +111,8 @@ async def remove_bot_from_list(chat_id: int, username: str) -> tuple[bool, str]:
         )
         await db.commit()
         if cur.rowcount:
-            return True, f"Removed @{username}."
-    return False, f"@{username} was not in the list."
+            return True, f"Удалён @{username}."
+    return False, f"@{username} не был в списке."
 
 
 async def should_delete_via_bot(chat_id: int, via_bot_username: str | None) -> bool:

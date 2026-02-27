@@ -31,17 +31,17 @@ def _is_admin(member) -> bool:
 
 async def _require_group_admin(message: Message) -> bool:
     if message.chat.type == "private":
-        await message.reply("Use this command in a group where I'm added.")
+        await message.reply("Используйте эту команду в группе, куда меня добавили.")
         return False
     if not message.from_user:
         return False
     try:
         member = await message.bot.get_chat_member(message.chat.id, message.from_user.id)
     except Exception:
-        await message.reply("Could not verify permissions.")
+        await message.reply("Не удалось проверить права.")
         return False
     if not _is_admin(member):
-        await message.reply("Only admins can change settings.")
+        await message.reply("Увы, вы не админ.")
         return False
     return True
 
@@ -50,11 +50,11 @@ async def _require_group_admin(message: Message) -> bool:
 async def cmd_start(message: Message) -> None:
     if message.chat.type == "private":
         await message.reply(
-            "Add me to a group, make me admin (with delete messages), then use there:\n"
-            "/ban_bot @name — delete messages sent via this bot\n"
-            "/allow_bot @name — do not delete messages via this bot\n"
+            "Добавьте меня в группу, сделайте админом (с правом удалять сообщения), затем там:\n"
+            "/ban_bot @имя — удалять сообщения, отправленные через этого бота\n"
+            "/allow_bot @имя — не удалять сообщения через этого бота\n"
             "/setmode blacklist | whitelist\n"
-            "/list — show mode and bot list"
+            "/list — показать режим и список ботов"
         )
         return
     if not await _require_group_admin(message):
@@ -64,12 +64,12 @@ async def cmd_start(message: Message) -> None:
     mode = await get_chat_mode(chat_id) or MODE_BLACKLIST
     bots = await get_chat_bot_list(chat_id)
     text = (
-        f"Mode: {mode}\n"
-        f"Bots: {len(bots)}/{BOT_LIST_LIMIT}\n\n"
-        "/ban_bot @name — add bot (blacklist) or remove from allowed (whitelist)\n"
-        "/allow_bot @name — remove from banned (blacklist) or add to allowed (whitelist)\n"
+        f"Режим: {mode}\n"
+        f"Ботов: {len(bots)}/{BOT_LIST_LIMIT}\n\n"
+        "/ban_bot @имя — добавить бота (чёрный список) или убрать из разрешённых (белый список)\n"
+        "/allow_bot @имя — убрать из бана (чёрный список) или добавить в разрешённые (белый список)\n"
         "/setmode blacklist | whitelist\n"
-        "/list — show full list"
+        "/list — показать полный список"
     )
     try:
         await message.reply(text)
@@ -88,7 +88,7 @@ async def cmd_ban_bot(message: Message) -> None:
     m = re.match(r"/ban_bot\s+(@?\w+)", text, re.I)
     username = m.group(1) if m else None
     if not username:
-        await message.reply("Usage: /ban_bot @botusername")
+        await message.reply("Использование: /ban_bot @имя_бота")
         return
     mode = await get_chat_mode(chat_id) or MODE_BLACKLIST
     if mode == MODE_BLACKLIST:
@@ -107,7 +107,7 @@ async def cmd_allow_bot(message: Message) -> None:
     m = re.match(r"/allow_bot\s+(@?\w+)", text, re.I)
     username = m.group(1) if m else None
     if not username:
-        await message.reply("Usage: /allow_bot @botusername")
+        await message.reply("Использование: /allow_bot @имя_бота")
         return
     mode = await get_chat_mode(chat_id) or MODE_BLACKLIST
     if mode == MODE_BLACKLIST:
@@ -127,27 +127,27 @@ async def cmd_setmode(message: Message) -> None:
     mode = m.group(1) if m else None
     if mode not in (MODE_BLACKLIST, MODE_WHITELIST):
         await message.reply(
-            "Usage: /setmode blacklist | whitelist\n"
-            "blacklist = delete only messages via listed bots\n"
-            "whitelist = delete messages via any bot not in the list"
+            "Использование: /setmode blacklist | whitelist\n"
+            "blacklist — удалять только сообщения через перечисленных ботов\n"
+            "whitelist — удалять сообщения через любых ботов, кроме перечисленных"
         )
         return
     await set_chat_mode(chat_id, mode)
-    await message.reply(f"Mode set to {mode}.")
+    await message.reply(f"Режим установлен: {mode}.")
 
 
 @router.message(Command("list"))
 async def cmd_list(message: Message) -> None:
     if message.chat.type == "private":
-        await message.reply("Use /list in the group.")
+        await message.reply("Используйте /list в группе.")
         return
     chat_id = message.chat.id
     mode = await get_chat_mode(chat_id) or MODE_BLACKLIST
     bots = await get_chat_bot_list(chat_id)
     if not bots:
-        await message.reply(f"Mode: {mode}. Bot list is empty.")
+        await message.reply(f"Режим: {mode}. Список ботов пуст.")
         return
-    lines = [f"Mode: {mode}", ""] + [f"• @{u}" for u in bots]
+    lines = [f"Режим: {mode}", ""] + [f"• @{u}" for u in bots]
     await message.reply("\n".join(lines))
 
 
