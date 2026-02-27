@@ -16,7 +16,7 @@ jobs:
       - name: Rsync to server
         uses: burnett01/rsync-deployments@6.0.0
         with:
-          switches: -avzr --delete
+          switches: -avzr --delete --filter='P data/' --filter='P .venv/'
           path: ./
           remote_path: ${{ env.DEPLOY_PATH }}/
           remote_host: ${{ secrets.SSH_HOST }}

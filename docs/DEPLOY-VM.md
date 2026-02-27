@@ -180,6 +180,9 @@ No need to SSH for routine updates.
 - **Permission denied (publickey)**  
   Check `SSH_PRIVATE_KEY` (full key, no extra spaces) and that the matching public key is in `~/.ssh/authorized_keys` on the VM.
 
+- **Rsync error 13 (permission denied)**  
+  The deploy user must have write access to `/opt/telegram-bot-filter`. Run `sudo chown -R $USER:$USER /opt/telegram-bot-filter` (as the user you use for `SSH_USER`).
+
 - **Bot not responding**  
   On the VM: `sudo journalctl -u telegram-bot-filter -f`. Check for Python errors or missing `BOT_TOKEN`.
 
