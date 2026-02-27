@@ -45,8 +45,8 @@ jobs:
               [ -d bot/.venv ] && cp -a bot/.venv new/
               [ -d bot/data ] && cp -a bot/data new/
             fi
-            # 3. Delete bot
-            rm -rf bot
+            # 3. Delete bot (sudo: __pycache__, data/ may be root-owned)
+            sudo rm -rf bot
             # 4. Rename new to bot
             mv new bot
             # 5. Finish

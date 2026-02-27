@@ -116,13 +116,14 @@ Allow the deploy user to restart the service without a password (replace `deploy
 sudo visudo
 ```
 
-Add this line at the end (one line):
+Add these lines at the end:
 
 ```
+deploy ALL=(ALL) NOPASSWD: /bin/rm -rf /opt/telegram-bot-filter/bot
 deploy ALL=(ALL) NOPASSWD: /bin/systemctl restart telegram-bot-filter
 ```
 
-Save and exit. If you deploy as **root**, you can skip this line.
+Save and exit. If you deploy as **root**, you can skip these.
 
 ---
 
