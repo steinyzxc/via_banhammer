@@ -85,7 +85,7 @@ async def cmd_ban_bot(message: Message) -> None:
         return
     chat_id = message.chat.id
     text = (message.text or "").strip()
-    m = re.match(r"/ban_bot\s+(@?\w+)", text, re.I)
+    m = re.match(r"/ban_bot(?:@\w+)?\s+(@?\w+)", text, re.I)
     username = m.group(1) if m else None
     if not username:
         await message.reply("Использование: /ban_bot @имя_бота")
@@ -104,7 +104,7 @@ async def cmd_allow_bot(message: Message) -> None:
         return
     chat_id = message.chat.id
     text = (message.text or "").strip()
-    m = re.match(r"/allow_bot\s+(@?\w+)", text, re.I)
+    m = re.match(r"/allow_bot(?:@\w+)?\s+(@?\w+)", text, re.I)
     username = m.group(1) if m else None
     if not username:
         await message.reply("Использование: /allow_bot @имя_бота")
@@ -123,7 +123,7 @@ async def cmd_setmode(message: Message) -> None:
         return
     chat_id = message.chat.id
     text = (message.text or "").strip().lower()
-    m = re.match(r"/setmode\s+(\w+)", text)
+    m = re.match(r"/setmode(?:@\w+)?\s+(\w+)", text)
     mode = m.group(1) if m else None
     if mode not in (MODE_BLACKLIST, MODE_WHITELIST):
         await message.reply(
