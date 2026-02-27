@@ -13,17 +13,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Rsync to server
-        uses: burnett01/rsync-deployments@6.0.0
-        with:
-          switches: -avzr --delete --filter='P data/' --filter='P .venv/'
-          path: ./
-          remote_path: ${{ env.DEPLOY_PATH }}/
-          remote_host: ${{ secrets.SSH_HOST }}
-          remote_user: ${{ secrets.SSH_USER }}
-          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Create archive
+        run: git archive -o app.tar.gz HEAD
 
-      - name: Deploy on server
+      - name: Copy archive to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "app.tar.gz"
+          target: "/tmp/"
+
+      - name: Extract and restart on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -31,7 +33,21 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            cd ${{ env.DEPLOY_PATH }}
+            DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
+            BASE=$(basename "$DEPLOY_PATH")
+            PARENT=$(dirname "$DEPLOY_PATH")
+            cd "$PARENT"
+            rm -rf "${BASE}.new"
+            mkdir "${BASE}.new"
+            tar xzf /tmp/app.tar.gz -C "${BASE}.new"
+            rm -f /tmp/app.tar.gz
+            # preserve .venv, data, .env
+            [ -d "${BASE}/.venv" ] && cp -a "${BASE}/.venv" "${BASE}.new/"
+            [ -d "${BASE}/data" ] && cp -a "${BASE}/data" "${BASE}.new/"
+            [ -f "${BASE}/.env" ] && cp -a "${BASE}/.env" "${BASE}.new/"
+            rm -rf "$BASE"
+            mv "${BASE}.new" "$BASE"
+            cd "$DEPLOY_PATH"
             echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" > .env
             python3 -m venv .venv 2>/dev/null || true
             . .venv/bin/activate

@@ -178,10 +178,11 @@ sudo journalctl -u telegram-bot-filter --since today
 
 After the first deploy, every time you run **Actions → Deploy → Run workflow**, the workflow will:
 
-- Rsync the repo to `/opt/telegram-bot-filter`
-- Write `.env` from `BOT_TOKEN`
-- Install dependencies in the venv
-- Restart `telegram-bot-filter` if the service is active
+- Build a tarball from the repo (`git archive`), copy it to the server via SCP
+- Extract into a new directory, preserve existing `.venv`, `data`, `.env`, then swap with the live dir
+- Write `.env` from `BOT_TOKEN`, install dependencies in the venv, restart `telegram-bot-filter` if active
+
+No rsync; server-generated files (e.g. `__pycache__`, `.venv`, `data`) are not touched by the file transfer, so no permission errors.
 
 No need to SSH for routine updates.
 
@@ -192,8 +193,8 @@ No need to SSH for routine updates.
 - **Permission denied (publickey)**  
   Check `SSH_PRIVATE_KEY` (full key, no extra spaces) and that the matching public key is in `~/.ssh/authorized_keys` on the VM.
 
-- **Rsync error 13 (permission denied)**  
-  The deploy user must have write access to `/opt/telegram-bot-filter`. Run `sudo chown -R $USER:$USER /opt/telegram-bot-filter` (as the user you use for `SSH_USER`).
+- **Permission denied when deploying**  
+  The deploy user must have write access to the parent of the deploy path (e.g. `/opt`). Run `sudo chown $USER /opt/telegram-bot-filter` if the directory already exists and is owned by root.
 
 - **Bot not responding**  
   On the VM: `sudo journalctl -u telegram-bot-filter -f`. Check for Python errors or missing `BOT_TOKEN`.

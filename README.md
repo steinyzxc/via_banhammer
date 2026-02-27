@@ -40,7 +40,7 @@ Workflow: `.github/workflows/deploy.yml`. Runs only when triggered manually: **A
 3. After first deploy:  
    `sudo systemctl start telegram-bot-filter`
 
-Deploy syncs the repo to `/opt/telegram-bot-filter`, writes `.env` from `BOT_TOKEN`, installs deps in a venv, and restarts `telegram-bot-filter` if the service is active. The deploy user must be able to `sudo systemctl restart telegram-bot-filter` (e.g. passwordless sudo for that command, or use root as `SSH_USER`).
+Deploy builds a tarball from the repo (`git archive`), copies it to the server via SCP, then extracts into a new dir, preserves `.venv`/`data`/`.env`, swaps the dirs, writes `.env` from `BOT_TOKEN`, installs deps, and restarts the service. No rsync; no permission issues with server-generated files. The deploy user must be able to `sudo systemctl restart telegram-bot-filter` (e.g. passwordless sudo, or use root as `SSH_USER`).
 
 ## Usage (in the group)
 
