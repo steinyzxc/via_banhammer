@@ -49,8 +49,8 @@ async def cmd_start(message: Message) -> None:
     if message.chat.type == "private":
         await message.reply(
             "Add me to a group, make me admin (with delete messages), then use there:\n"
-            "/ban_bot @name — delete messages sent via this bot\n"
-            "/allow_bot @name — do not delete messages via this bot\n"
+            "/ban\\_bot @name — delete messages sent via this bot\n"
+            "/allow\\_bot @name — do not delete messages via this bot\n"
             "/setmode blacklist | whitelist\n"
             "/list — show mode and bot list"
         )
@@ -64,8 +64,8 @@ async def cmd_start(message: Message) -> None:
     await message.reply(
         f"Mode: **{mode}**\n"
         f"Bots: {len(bots)}/{BOT_LIST_LIMIT}\n\n"
-        "/ban_bot @name — add bot (blacklist) or remove from allowed (whitelist)\n"
-        "/allow_bot @name — remove from banned (blacklist) or add to allowed (whitelist)\n"
+        "/ban\\_bot @name — add bot (blacklist) or remove from allowed (whitelist)\n"
+        "/allow\\_bot @name — remove from banned (blacklist) or add to allowed (whitelist)\n"
         "/setmode blacklist | whitelist\n"
         "/list — show full list",
         parse_mode="Markdown",
@@ -131,7 +131,8 @@ async def cmd_setmode(message: Message) -> None:
 
 @router.message(Command("list"))
 async def cmd_list(message: Message) -> None:
-    if not await _require_group_admin(message):
+    if message.chat.type == "private":
+        await message.reply("Use /list in the group.")
         return
     chat_id = message.chat.id
     mode = await get_chat_mode(chat_id) or MODE_BLACKLIST

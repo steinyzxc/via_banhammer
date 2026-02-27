@@ -18,6 +18,8 @@ Deletes messages in a group that were sent **via** specific inline bots (e.g. "v
 
 Workflow: `.github/workflows/deploy.yml`. Runs only when triggered manually: **Actions → Deploy → Run workflow**.
 
+**Full step-by-step for a new VM:** [docs/DEPLOY-VM.md](docs/DEPLOY-VM.md)
+
 **Secrets** (Settings → Secrets and variables → Actions):
 
 | Secret | Required | Description |
