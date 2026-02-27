@@ -84,7 +84,7 @@ sudo cp /path/to/deploy/telegram-bot-filter.service /etc/systemd/system/
 sudo nano /etc/systemd/system/telegram-bot-filter.service
 ```
 
-Paste this (path must be `/opt/telegram-bot-filter`):
+Paste this (deploy path is `/opt/telegram-bot-filter`, app runs from `bot/` inside it):
 
 ```ini
 [Unit]
@@ -93,8 +93,8 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/telegram-bot-filter
-ExecStart=/opt/telegram-bot-filter/.venv/bin/python main.py
+WorkingDirectory=/opt/telegram-bot-filter/bot
+ExecStart=/opt/telegram-bot-filter/bot/.venv/bin/python main.py
 Restart=always
 RestartSec=5
 User=root
@@ -176,13 +176,14 @@ sudo journalctl -u telegram-bot-filter --since today
 
 ## 8. Later deploys
 
-After the first deploy, every time you run **Actions → Deploy → Run workflow**, the workflow will:
+Layout: the deploy path (e.g. `/opt/telegram-bot-filter`) contains a subfolder **`bot/`** with the running app (code, `.env`, `.venv`, `data/`).
 
-- Build a tarball from the repo (`git archive`), copy it to the server via SCP
-- Extract into a new directory, preserve existing `.venv`, `data`, `.env`, then swap with the live dir
-- Write `.env` from `BOT_TOKEN`, install dependencies in the venv, restart `telegram-bot-filter` if active
+Each deploy:
 
-No rsync; server-generated files (e.g. `__pycache__`, `.venv`, `data`) are not touched by the file transfer, so no permission errors.
+1. Create subfolder **`new`**, extract the archive into it.
+2. Copy from **`bot`** into **`new`**: `.env`, `.venv`, `data/`.
+3. Delete **`bot`**, rename **`new`** to **`bot`**.
+4. Write `.env` from `BOT_TOKEN`, run `pip install`, restart the service.
 
 No need to SSH for routine updates.
 
