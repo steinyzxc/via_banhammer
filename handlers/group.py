@@ -73,6 +73,7 @@ async def cmd_start(message: Message) -> None:
     )
     try:
         await message.reply(text)
+        log.info("Sent /start /help in chat %s", chat_id)
     except Exception:
         log.exception("Failed to send /start /help reply in chat %s", chat_id)
         raise
