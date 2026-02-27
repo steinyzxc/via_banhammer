@@ -14,6 +14,5 @@ async def cmd_start_pm(message: Message) -> None:
         return
     await message.reply(
         "Add me to a group and make me admin (with delete messages). "
-        "Then in that group use: /ban_bot, /allow_bot, /setmode, /list.",
-        parse_mode=None,
+        "Then in that group use: /ban_bot, /allow_bot, /setmode, /list."
     )

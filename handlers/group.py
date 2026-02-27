@@ -51,8 +51,8 @@ async def cmd_start(message: Message) -> None:
     if message.chat.type == "private":
         await message.reply(
             "Add me to a group, make me admin (with delete messages), then use there:\n"
-            "/ban\\_bot @name — delete messages sent via this bot\n"
-            "/allow\\_bot @name — do not delete messages via this bot\n"
+            "/ban_bot @name — delete messages sent via this bot\n"
+            "/allow_bot @name — do not delete messages via this bot\n"
             "/setmode blacklist | whitelist\n"
             "/list — show mode and bot list"
         )
@@ -72,7 +72,7 @@ async def cmd_start(message: Message) -> None:
         "/list — show full list"
     )
     try:
-        await message.reply(text, parse_mode=None)
+        await message.reply(text)
     except Exception:
         log.exception("Failed to send /start /help reply in chat %s", chat_id)
         raise

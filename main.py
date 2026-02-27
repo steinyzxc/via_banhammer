@@ -5,7 +5,6 @@ import os
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
 from aiogram.types import ErrorEvent
 from dotenv import load_dotenv
 
@@ -29,7 +28,7 @@ async def main() -> None:
     await init_db()
     bot = Bot(
         token=BOT_TOKEN,
-        default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN),
+        default=DefaultBotProperties(parse_mode=None),
     )
     dp = Dispatcher()
 
