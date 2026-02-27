@@ -162,7 +162,19 @@ If the workflow already ran and the service was enabled, it may start automatica
 
 ---
 
-## 7. Later deploys
+## 7. Logs on the server
+
+The bot runs as the `telegram-bot-filter` systemd service. To view logs:
+
+```bash
+sudo journalctl -u telegram-bot-filter -f    # follow (live)
+sudo journalctl -u telegram-bot-filter -n 100   # last 100 lines
+sudo journalctl -u telegram-bot-filter --since today
+```
+
+---
+
+## 8. Later deploys
 
 After the first deploy, every time you run **Actions → Deploy → Run workflow**, the workflow will:
 

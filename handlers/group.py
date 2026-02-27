@@ -1,6 +1,7 @@
 """Group handlers: admin-only setup and via_bot message deletion."""
 from __future__ import annotations
 
+import logging
 import re
 from aiogram import Router, F
 from aiogram.filters import Command
@@ -21,6 +22,7 @@ from storage import (
 )
 
 router = Router()
+log = logging.getLogger(__name__)
 
 
 def _is_admin(member) -> bool:
@@ -61,15 +63,19 @@ async def cmd_start(message: Message) -> None:
     await ensure_chat(chat_id)
     mode = await get_chat_mode(chat_id) or MODE_BLACKLIST
     bots = await get_chat_bot_list(chat_id)
-    await message.reply(
-        f"Mode: **{mode}**\n"
+    text = (
+        f"Mode: {mode}\n"
         f"Bots: {len(bots)}/{BOT_LIST_LIMIT}\n\n"
-        "/ban\\_bot @name — add bot (blacklist) or remove from allowed (whitelist)\n"
-        "/allow\\_bot @name — remove from banned (blacklist) or add to allowed (whitelist)\n"
+        "/ban_bot @name — add bot (blacklist) or remove from allowed (whitelist)\n"
+        "/allow_bot @name — remove from banned (blacklist) or add to allowed (whitelist)\n"
         "/setmode blacklist | whitelist\n"
-        "/list — show full list",
-        parse_mode="Markdown",
+        "/list — show full list"
     )
+    try:
+        await message.reply(text, parse_mode=None)
+    except Exception:
+        log.exception("Failed to send /start /help reply in chat %s", chat_id)
+        raise
 
 
 @router.message(Command("ban_bot"), F.text)
