@@ -14,6 +14,15 @@ Deletes messages in a group that were sent **via** specific inline bots (e.g. "v
 3. `pip install -r requirements.txt`
 4. Run: `python main.py`
 
+## Docker
+
+```bash
+cp .env.example .env   # задать BOT_TOKEN
+docker compose up -d
+```
+
+Образ на `python:3.12-slim`, данные в volume `bot_data`. Без systemd.
+
 ## Deploy with GitHub Actions
 
 Workflow: `.github/workflows/deploy.yml`. Runs only when triggered manually: **Actions → Deploy → Run workflow**.
@@ -31,16 +40,11 @@ Workflow: `.github/workflows/deploy.yml`. Runs only when triggered manually: **A
 
 **One-time on server**
 
-1. Create app dir and allow `SSH_USER` to write:  
+1. Install Docker and Docker Compose.
+2. Create app dir and allow `SSH_USER` to write:  
    `sudo mkdir -p /opt/telegram-bot-filter && sudo chown $USER /opt/telegram-bot-filter`
-2. Install systemd unit:  
-   `sudo cp deploy/telegram-bot-filter.service /etc/systemd/system/`  
-   `sudo systemctl daemon-reload`  
-   `sudo systemctl enable telegram-bot-filter`
-3. After first deploy:  
-   `sudo systemctl start telegram-bot-filter`
 
-Deploy path contains a **`bot/`** subfolder (the app). Each deploy: create **`new`**, extract archive into it, copy `.env`/`.venv`/`data` from **`bot`** into **`new`**, delete **`bot`**, rename **`new`** → **`bot`**, then write `.env`, install deps, restart. The deploy user must be able to `sudo systemctl restart telegram-bot-filter` (e.g. passwordless sudo, or use root as `SSH_USER`).
+Deploy: workflow copies archive to server, extracts into deploy path, writes `.env` from `BOT_TOKEN`, runs `docker compose up -d --build`. Data (DB) in Docker volume `bot_data`. No systemd.
 
 ## Usage (in the group)
 

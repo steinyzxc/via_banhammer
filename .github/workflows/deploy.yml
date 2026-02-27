@@ -25,7 +25,7 @@ jobs:
           source: "app.tar.gz"
           target: "/tmp/"
 
-      - name: Deploy on server
+      - name: Deploy on server (Docker)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -34,28 +34,12 @@ jobs:
           script: |
             set -e
             DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
+            sudo mkdir -p "$DEPLOY_PATH"
+            sudo chown -R $USER:$USER "$DEPLOY_PATH"
             cd "$DEPLOY_PATH"
-            # 1. Create new
-            mkdir -p new
-            tar xzf /tmp/app.tar.gz -C new
+            find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+            tar xzf /tmp/app.tar.gz -C .
             rm -f /tmp/app.tar.gz
-            # 2. Copy necessary data from bot into new
-            if [ -d bot ]; then
-              [ -f bot/.env ] && cp -a bot/.env new/
-              [ -d bot/.venv ] && cp -a bot/.venv new/
-              [ -d bot/data ] && cp -a bot/data new/
-            fi
-            # 3. Delete bot (sudo: __pycache__, data/ may be root-owned)
-            sudo rm -rf bot
-            # 4. Rename new to bot
-            mv new bot
-            # 5. Finish
-            cd "$DEPLOY_PATH/bot"
             echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" > .env
-            python3 -m venv .venv 2>/dev/null || true
-            . .venv/bin/activate
-            pip install -q -r requirements.txt
-            if systemctl is-active --quiet telegram-bot-filter 2>/dev/null; then
-              sudo systemctl restart telegram-bot-filter
-            fi
+            docker compose up -d --build
             echo "Deploy done."
